@@ -7,12 +7,12 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/julienschmidt/httprouter"
+	"github.com/echo"
 )
 
 // NewServer initializes the service with the given Database, and sets up appropriate routes.
 func NewServer(db *Database) *Server {
-	router := httprouter.New()
+	router := echo.New()
 	server := &Server{
 		router: router,
 		db:     db,
@@ -25,7 +25,7 @@ func NewServer(db *Database) *Server {
 // Server contains all that is needed to respond to incoming requests, like a database. Other services like a mail,
 // redis, or S3 server could also be added.
 type Server struct {
-	router *httprouter.Router
+	router *echo.Echo
 	db     *Database
 }
 

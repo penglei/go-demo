@@ -4,8 +4,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/CircleCI-Public/circleci-demo-go/service"
-	"github.com/CircleCI-Public/circleci-demo-go/test"
+	"workshop-demo/test"
+	"workshop/service"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"workshop-demo/service"
 
-	"github.com/CircleCI-Public/circleci-demo-go/service"
-	_ "github.com/mattes/migrate/driver/postgres"
-	"github.com/mattes/migrate/migrate"
+	_ "github.com/golang-migrate/driver/postgres"
+	"github.com/golang-migrate/migrate/migrate"
 )
 
 func main() {
