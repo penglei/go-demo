@@ -2,12 +2,11 @@ package service
 
 import (
 	"encoding/json"
+	"github.com/echo"
 	"log"
 	"net/http"
 	"net/url"
 	"strings"
-
-	"github.com/echo"
 )
 
 // NewServer initializes the service with the given Database, and sets up appropriate routes.
@@ -81,12 +80,12 @@ func (s *Server) AddContact(w http.ResponseWriter, r *http.Request, ps httproute
 		return
 	}
 
-	contactId, err := s.db.AddContact(contact)
+	contactID, err := s.db.AddContact(contact)
 	if err != nil {
 		panic(err)
 		return
 	}
-	contact.Id = contactId
+	contact.ID = contactID
 
 	writeJSON(
 		w,
@@ -97,7 +96,7 @@ func (s *Server) AddContact(w http.ResponseWriter, r *http.Request, ps httproute
 	)
 }
 
-// AddContact handles HTTP requests to GET a Contact by an email address.
+//GetContactByEmail handles HTTP requests to GET a Contact by an email address.
 func (s *Server) GetContactByEmail(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	email, err := url.QueryUnescape(ps.ByName("email"))
 	if err != nil {

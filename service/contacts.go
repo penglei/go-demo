@@ -4,7 +4,7 @@ import "database/sql"
 
 // Contact describes a contact in our database.
 type Contact struct {
-	Id    int    `json:"id"`
+	ID    int    `json:"id"`
 	Email string `json:"email"`
 	Name  string `json:"name"`
 }
@@ -13,12 +13,12 @@ type Contact struct {
 
 // AddContact inserts a new contact into the database.
 func (db *Database) AddContact(c Contact) (int, error) {
-	var contactId int
+	var contactID int
 	err := db.Write(func(tx *Transaction) {
-		contactId = tx.AddContact(c)
+		contactID = tx.AddContact(c)
 	})
 
-	return contactId, err
+	return contactID, err
 }
 
 // AddContact inserts a new contact within the transaction.
@@ -57,7 +57,7 @@ func (tx *Transaction) GetContactByEmail(email string) *Contact {
 	)
 
 	var contact Contact
-	err := row.Scan(&contact.Id, &contact.Email, &contact.Name)
+	err := row.Scan(&contact.ID, &contact.Email, &contact.Name)
 	if err == nil {
 		return &contact
 	} else if err == sql.ErrNoRows {

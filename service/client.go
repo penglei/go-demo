@@ -87,11 +87,8 @@ func (c *DefaultClient) performRequest(req *http.Request, response interface{}) 
 	}
 
 	// map the response to an object value
-	if err := json.Unmarshal(responseBody, &response); err != nil {
-		return err
-	}
-
-	return nil
+	err = json.Unmarshal(responseBody, &response)
+	return err
 }
 
 // newRequest builds a new request using the given parameters.
@@ -125,19 +122,18 @@ func (c *DefaultClient) newRequest(method string, path string, headers map[strin
 	return req, nil
 }
 
-
-
-// ----- Add Contact ---------------------------------------------------------------------------------------------------
-
+//AddContactRequest is request payload for creating a contact
 type AddContactRequest struct {
 	Email string `json:"email"`
 	Name  string `json:"name"`
 }
 
+//ContactResponse used to response contact to request
 type ContactResponse struct {
 	Contact *Contact `json:"contact"`
 }
 
+//AddContact accept a AddContactRequest and save it by HTTP request
 func (c *DefaultClient) AddContact(contact AddContactRequest) (*Contact, error) {
 	var response ContactResponse
 	err := c.performRequestMethod(http.MethodPost, "/contacts", nil, contact, &response)
@@ -148,6 +144,7 @@ func (c *DefaultClient) AddContact(contact AddContactRequest) (*Contact, error) 
 	return response.Contact, nil
 }
 
+//GetContactByEmail return email in the contact
 func (c *DefaultClient) GetContactByEmail(email string) (*Contact, error) {
 	var response ContactResponse
 	var path = fmt.Sprintf("/contacts/%v", url.QueryEscape(email))

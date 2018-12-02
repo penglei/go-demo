@@ -3,24 +3,26 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"github.com/golang-migrate/migrate"
 	"net/http"
 	"os"
 	"workshop-demo/service"
-
-	_ "github.com/golang-migrate/driver/postgres"
-	"github.com/golang-migrate/migrate/migrate"
 )
 
 func main() {
 	db := SetupDB()
 	server := service.NewServer(db)
 	http.HandleFunc("/", server.ServeHTTP)
-	http.ListenAndServe(":8080", nil)
+	var err = http.ListenAndServe(":8080", nil)
+	if err != nil {
+		panic(err)
+	}
 }
 
+//SetupDB connect database and create a Database object
 func SetupDB() *service.Database {
-	databaseUrl := os.Getenv("CONTACTS_DB_URL")
-	if databaseUrl == "" {
+	databaseURL := os.Getenv("CONTACTS_DB_URL")
+	if databaseURL == "" {
 		panic("CONTACTS_DB_URL must be set!")
 	}
 
@@ -28,12 +30,12 @@ func SetupDB() *service.Database {
 	if sqlFilesEnv := os.Getenv("CONTACTS_DB_MIGRATIONS"); sqlFilesEnv != "" {
 		sqlFiles = sqlFilesEnv
 	}
-	allErrors, ok := migrate.ResetSync(databaseUrl, sqlFiles)
+	allErrors, ok := migrate.ResetSync(databaseURL, sqlFiles)
 	if !ok {
 		panic(fmt.Sprintf("%+v", allErrors))
 	}
 
-	db, err := sql.Open("postgres", databaseUrl)
+	db, err := sql.Open("postgres", databaseURL)
 	if err != nil {
 		panic(fmt.Sprintf("Unable to open DB connection: %+v", err))
 	}

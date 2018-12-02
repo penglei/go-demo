@@ -11,8 +11,12 @@ type Database struct {
 	DB *sql.DB
 }
 
+//Close the database connection
 func (db *Database) Close() {
-	db.DB.Close()
+	var err = db.DB.Close()
+	if err != nil {
+		panic(err)
+	}
 }
 
 // ===== TRANSACTIONS ==================================================================================================
@@ -23,6 +27,7 @@ type Transaction struct {
 	db *Database
 }
 
+//TransactionFunc will execute in a transaction
 type TransactionFunc func(*Transaction)
 
 func (db *Database) begin() (*Transaction, error) {
