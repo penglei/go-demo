@@ -1,4 +1,4 @@
-module workshop-demo
+module github.com/qcloud2018/go-demo
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
