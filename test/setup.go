@@ -42,7 +42,7 @@ func SetupEnv(t *testing.T) *Env {
 
 // SetupDB initializes a test database, performing all migrations.
 func SetupDB(t *testing.T) *service.Database {
-	databaseURL := os.Getenv("CONTACTS_DB_URL")
+	databaseURl := os.Getenv("CONTACTS_DB_URL")
 	require.NotEmpty(t, databaseURL, "CONTACTS_DB_URL must be set!")
 
 	sqlFiles := "./db/migrations"
