@@ -1,7 +1,8 @@
-FROM golang:1.11.2-alpine3.8 as builder
+#FROM golang:1.11.2-alpine3.8 as builder
+FROM hub.tencentyun.com/workshop/go-demo-cache-builder:latest as builder
 WORKDIR /go/src/github.com/qcloud2018/go-demo
 COPY . /go/src/github.com/qcloud2018/go-demo
-RUN go get -u golang.org/x/vgo && vgo build -v -a -o /go-demo
+RUN vgo build -v -a -o /go-demo
 
 FROM alpine:3.8
 EXPOSE 8080
