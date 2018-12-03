@@ -4,7 +4,7 @@ WORKDIR /go/src/github.com/qcloud2018/go-demo
 COPY . /go/src/github.com/qcloud2018/go-demo
 RUN vgo build -v -a -o /go-demo
 
-FROM alpine:3.8
+FROM debian:stretch
 EXPOSE 8080
 CMD ["/go-demo"]
 ADD nsswitch.conf    /etc/
