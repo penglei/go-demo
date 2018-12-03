@@ -2,8 +2,8 @@ module github.com/qcloud2018/go-demo
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/golang-migrate/migrate v3.5.4+incompatible // indirect
-	github.com/labstack/echo v3.3.5+incompatible // indirect
+	github.com/golang-migrate/migrate v3.5.4+incompatible
+	github.com/labstack/echo v3.3.5+incompatible
 	github.com/labstack/gommon v0.2.8 // indirect
 	github.com/mattn/go-colorable v0.0.9 // indirect
 	github.com/mattn/go-isatty v0.0.4 // indirect

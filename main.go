@@ -3,10 +3,9 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"github.com/golang-migrate/migrate"
+	"github.com/qcloud2018/go-demo/service"
 	"net/http"
 	"os"
-	"workshop-demo/service"
 )
 
 func main() {
@@ -26,19 +25,10 @@ func SetupDB() *service.Database {
 		panic("CONTACTS_DB_URL must be set!")
 	}
 
-	sqlFiles := "./db/migrations"
-	if sqlFilesEnv := os.Getenv("CONTACTS_DB_MIGRATIONS"); sqlFilesEnv != "" {
-		sqlFiles = sqlFilesEnv
-	}
-	allErrors, ok := migrate.ResetSync(databaseURL, sqlFiles)
-	if !ok {
-		panic(fmt.Sprintf("%+v", allErrors))
-	}
-
 	db, err := sql.Open("postgres", databaseURL)
 	if err != nil {
 		panic(fmt.Sprintf("Unable to open DB connection: %+v", err))
 	}
 
-	return &service.Database{db}
+	return &service.Database{DB: db}
 }

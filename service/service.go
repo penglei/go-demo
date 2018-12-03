@@ -2,10 +2,9 @@ package service
 
 import (
 	"encoding/json"
-	"github.com/echo"
-	"log"
+	"errors"
+	"github.com/labstack/echo"
 	"net/http"
-	"net/url"
 	"strings"
 )
 
@@ -46,6 +45,7 @@ func (s *Server) setupRoutes() {
 	// By default the router will handle errors. But the service should always return JSON if possible, so these
 	// custom handlers are added.
 
+	/*
 	s.router.NotFound = http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			writeJSONError(w, http.StatusNotFound, "")
@@ -68,22 +68,24 @@ func (s *Server) setupRoutes() {
 			writeJSONError(w, http.StatusInternalServerError, "")
 		}
 	}
+	*/
 }
 
 // AddContact handles HTTP requests to add a Contact.
-func (s *Server) AddContact(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (s *Server) AddContact(c echo.Context) error {
 	var contact Contact
+	//w http.ResponseWriter, r *http.Request, ps httprouter.Params)
+	var r, w = c.Request(), c.Response().Writer
 
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&contact); err != nil {
-		writeJSONError(w, http.StatusBadRequest, "Error decoding JSON")
-		return
+		// writeJSONError(w, http.StatusBadRequest, "Error decoding JSON")
+		return errors.New("error decoding JSON")
 	}
 
 	contactID, err := s.db.AddContact(contact)
 	if err != nil {
-		panic(err)
-		return
+		return err
 	}
 	contact.ID = contactID
 
@@ -94,22 +96,18 @@ func (s *Server) AddContact(w http.ResponseWriter, r *http.Request, ps httproute
 			Contact: &contact,
 		},
 	)
+	return nil
 }
 
 //GetContactByEmail handles HTTP requests to GET a Contact by an email address.
-func (s *Server) GetContactByEmail(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	email, err := url.QueryUnescape(ps.ByName("email"))
-	if err != nil {
-		writeJSONError(w, http.StatusBadRequest, "Invalid email.")
-		return
-	}
-
-	email = strings.TrimSpace(email)
+func (s *Server) GetContactByEmail(c echo.Context) error {
+	// (w http.ResponseWriter, r *http.Request, ps httprouter.Params)
+	var email = strings.TrimSpace(c.QueryParam("email"))
 	if email == "" {
-		writeJSONError(w, http.StatusBadRequest, "Expected a single email.")
-		return
+		return errors.New("expected a single email")
 	}
 
+	var w = c.Response().Writer
 	contact, err := s.db.GetContactByEmail(email)
 	if err != nil {
 		writeUnexpectedError(w, err)
@@ -124,6 +122,7 @@ func (s *Server) GetContactByEmail(w http.ResponseWriter, r *http.Request, ps ht
 			},
 		)
 	}
+	return nil
 }
 
 // ===== JSON HELPERS ==================================================================================================
@@ -133,7 +132,10 @@ func writeJSON(w http.ResponseWriter, statusCode int, response interface{}) {
 	w.WriteHeader(statusCode)
 
 	encoder := json.NewEncoder(w)
-	encoder.Encode(response)
+	var err = encoder.Encode(response)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func writeJSONError(w http.ResponseWriter, statusCode int, message string) {
