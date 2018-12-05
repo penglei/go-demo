@@ -132,6 +132,7 @@ ENTRYPOINT /entrypoint.sh
 
 RUn apt-get  update && apt-get install -y --no-install-recommends ca-certificates wget git curl runit netcat && rm -rf /var/lib/apt/lists/* && go get -u golang.org/x/vgo
 
+LABEL TencentHubComponent='{"description": "自动化测试go-demo。组件内运行了mysql","input":[{"name": "GIT_CLONE_URL", "desc":"源代码地址"},{"name":"GIT_REF","desc":"git 提交对象，可以是一个git branch, git tag 或者git commit ID, 默认值master"},{"name":"GIT_REPO_DIR","desc":"git clone到本地的目录"}], "output":[]}'
 
 ADD component-base/libs.sh /component-base/
 ADD ./sv /etc/sv
