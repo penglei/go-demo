@@ -39,7 +39,7 @@ func SetupDB(dbConf config.Database) *service.Database {
 		panic("db config must be set!")
 	}
 
-	db, err := sql.Open("postgres", databaseURL)
+	db, err := sql.Open("mysql", databaseURL)
 	if err != nil {
 		panic(fmt.Sprintf("Unable to open DB connection: %+v", err))
 	}

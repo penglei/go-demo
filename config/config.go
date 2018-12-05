@@ -1,6 +1,9 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+	"net/url"
+)
 
 type Database struct {
 	Host     string
@@ -8,12 +11,13 @@ type Database struct {
 	User     string
 	Password string
 	Name     string
+	Charset  string
 }
 
 func (db Database) GetURL() string {
-	// "postgres://bob:secret@1.2.3.4:5432/mydb?sslmode=verify-full"
-	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
-		db.User, db.Password, db.Host, db.Port, db.Name)
+	var userInfo = db.User + ":" + db.Password
+	return fmt.Sprintf("%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=UTC&time_zone=%s",
+		userInfo, db.Host, db.Port, db.Name, db.Charset, url.QueryEscape(`"+00:00"`))
 }
 
 type Config struct {

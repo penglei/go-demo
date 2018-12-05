@@ -39,7 +39,6 @@ func NewFileMigration(c config.Database) *FileMigration {
 		Port:     c.Port,
 		User:     c.User,
 		Password: c.Password,
-		Charset:  c.Charset,
 		Name:     c.Name,
 	}
 }

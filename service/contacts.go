@@ -24,7 +24,7 @@ func (db *Database) AddContact(c Contact) (int, error) {
 // AddContact inserts a new contact within the transaction.
 func (tx *Transaction) AddContact(c Contact) int {
 	row := tx.QueryRow(
-		"INSERT INTO contacts (email, name) VALUES ($1, $2) RETURNING id",
+		"INSERT INTO contacts (email, name) VALUES ($1, $2)",
 		c.Email,
 		c.Name,
 	)
