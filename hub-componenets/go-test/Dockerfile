@@ -63,7 +63,7 @@ RUN set -x \
 	&& wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)" \
 	&& wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc" \
 	&& export GNUPGHOME="$(mktemp -d)" \
-	&& gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
+	&& gpg --batch --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
 	&& gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
 	&& gpgconf --kill all \
 	&& rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc \
@@ -90,7 +90,7 @@ RUN set -ex; \
 # gpg: key 5072E1F5: public key "MySQL Release Engineering <mysql-build@oss.oracle.com>" imported
 	key='A4A9406876FCBD3C456770C88C718D3B5072E1F5'; \
 	export GNUPGHOME="$(mktemp -d)"; \
-	gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
+	gpg --batch --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "$key"; \
 	gpg --batch --export "$key" > /etc/apt/trusted.gpg.d/mysql.gpg; \
 	gpgconf --kill all; \
 	rm -rf "$GNUPGHOME"; \
@@ -127,13 +127,15 @@ EXPOSE 3306 33060
 
 #----------------------- End MySQL 5.7 Install -----------------------------------#
 
-# RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y -q runit
-
 ENTRYPOINT /entrypoint.sh
 # install vgo
-RUN go get -u golang.org/x/vgo
 
-COPY ./*.sh /
+RUn apt-get  update && apt-get install -y --no-install-recommends ca-certificates wget git curl runit netcat && rm -rf /var/lib/apt/lists/* && go get -u golang.org/x/vgo
+
+
+ADD component-base/libs.sh /component-base/
+ADD ./sv /etc/sv
+ADD ./*.sh /
 
 #----------------------- End runit Install -----------------------------------#
 
