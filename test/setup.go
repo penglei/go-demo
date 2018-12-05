@@ -2,15 +2,13 @@ package test
 
 import (
 	"database/sql"
-	"github.com/mattes/migrate/migrate"
+	"github.com/qcloud2018/go-demo/service"
 	"github.com/stretchr/testify/require"
 	"net/http/httptest"
-	"os"
 	"testing"
-	"workshop-demo/service"
 )
 
-// Env provides access to all services used in tests, like the database, our server, and an HTTP client for performing
+// Env provides ess to all services used in tests, like the database, our server, and an HTTP client for performing
 // HTTP requests against the test server.
 type Env struct {
 	T          *testing.T
@@ -42,16 +40,7 @@ func SetupEnv(t *testing.T) *Env {
 
 // SetupDB initializes a test database, performing all migrations.
 func SetupDB(t *testing.T) *service.Database {
-	databaseURL := os.Getenv("CONTACTS_DB_URL")
-	require.NotEmpty(t, databaseURL, "CONTACTS_DB_URL must be set!")
-
-	sqlFiles := "./db/migrations"
-	if sqlFilesEnv := os.Getenv("CONTACTS_DB_MIGRATIONS"); sqlFilesEnv != "" {
-		sqlFiles = sqlFilesEnv
-	}
-	allErrors, ok := migrate.ResetSync(databaseURL, sqlFiles)
-	require.True(t, ok, "Failed to migrate database %v", allErrors)
-
+	var databaseURL string
 	db, err := sql.Open("postgres", databaseURL)
 	require.NoError(t, err, "Error opening database")
 

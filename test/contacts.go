@@ -1,8 +1,7 @@
 package test
 
 import (
-	"workshop-demo/service"
-
+	"github.com/qcloud2018/go-demo/service"
 	"github.com/stretchr/testify/require"
 )
 

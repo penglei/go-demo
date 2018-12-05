@@ -1,14 +1,12 @@
 package service_test
 
 import (
-	"net/http"
-	"testing"
-
-	"workshop-demo/test"
-	"workshop/service"
-
+	"github.com/qcloud2018/go-demo/service"
+	"github.com/qcloud2018/go-demo/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"net/http"
+	"testing"
 )
 
 // Test_AddContact shows how to structure a basic service test. Notice the 'SETUP', 'TEST', and 'VERIFY' steps that
@@ -28,7 +26,7 @@ func Test_AddContact(t *testing.T) {
 	// VERIFY: Response contains the contact
 	require.NoError(t, err, "Unable to get contact via API")
 	require.NotEmpty(t, contact, "Contact not found")
-	assert.True(t, contact.Id > 0, "Contact ID is missing")
+	assert.True(t, contact.ID > 0, "Contact ID is missing")
 	assert.Equal(t, contact.Email, "alice@example.xyz")
 	assert.Equal(t, contact.Name, "Alice Zulu")
 
@@ -56,7 +54,7 @@ func Test_GetContactByEmail(t *testing.T) {
 		// VERIFY: Response contains the contact
 		require.NoError(t, err, "Unable to get contact via API")
 		require.NotEmpty(t, contact, "Contact not found")
-		assert.True(t, contact.Id > 0, "Contact ID is missing")
+		assert.True(t, contact.ID > 0, "Contact ID is missing")
 		assert.Equal(t, contact.Email, "alice@example.xyz")
 		assert.Equal(t, contact.Name, "Alice Zulu")
 	}

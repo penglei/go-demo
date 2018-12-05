@@ -35,7 +35,7 @@ func NewClient(baseURL string) Client {
 	}
 }
 
-// ===== DefaultClient =================================================================================================
+// ===== DefaultClient======
 
 // DefaultClient provides an implementation of the Client interface.
 type DefaultClient struct {

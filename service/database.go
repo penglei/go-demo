@@ -69,7 +69,7 @@ func (db *Database) Read(reader TransactionFunc) (err error) {
 	// Mark the transaction as read only
 	_, err = tx.Exec("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
 	if err != nil {
-		panic(fmt.Errorf("Unable to mark transaction read-only"))
+		panic(fmt.Errorf("unable to mark transaction read-only"))
 	}
 
 	reader(tx) // Code in this function can panic
