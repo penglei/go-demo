@@ -23,9 +23,14 @@ do_task() {
 
 	(wait_service)
 
-	hub_git_clone
+	hub_git_clone #clone and change work directory to git repo path
 
-	#TODO vgo test
+	# init database migrate
+	vgo build cmd/*.go -o /go-demo
+	/go-demo migrate up
+
+	# run test!
+	./test-service.sh
 
 	echo "test completed successfully!"
 }

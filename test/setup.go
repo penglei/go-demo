@@ -2,7 +2,12 @@ package test
 
 import (
 	"database/sql"
+	"flag"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/qcloud2018/go-demo/config"
+	"github.com/qcloud2018/go-demo/logger"
 	"github.com/qcloud2018/go-demo/service"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 	"net/http/httptest"
 	"testing"
@@ -24,9 +29,33 @@ func (env *Env) Close() {
 	env.DB.Close()
 }
 
+var conf = config.Config{}
+
+func init() {
+	flag.Parse()
+	var cfgFile = flag.Arg(0)
+	if cfgFile == "" {
+		panic("no main config specified")
+	}
+	viper.SetConfigFile(cfgFile)
+	viper.AutomaticEnv()
+	viper.SetEnvPrefix("GO_DEMO")
+
+	if err := viper.ReadInConfig(); err != nil {
+		panic(err)
+	}
+	if err := viper.Unmarshal(&conf); err != nil {
+		panic(err)
+	}
+	if err := logger.InitZapLogger(conf.Env, conf.LogLevel, conf.LogFormat); err != nil {
+		panic(err)
+	}
+
+}
+
 // SetupEnv creates a new test environment, including a clean database and an instance of our HTTP service.
 func SetupEnv(t *testing.T) *Env {
-	db := SetupDB(t)
+	db := SetupDB(t, conf)
 	server := service.NewServer(db)
 	httpServer := httptest.NewServer(server)
 	return &Env{
@@ -39,10 +68,10 @@ func SetupEnv(t *testing.T) *Env {
 }
 
 // SetupDB initializes a test database, performing all migrations.
-func SetupDB(t *testing.T) *service.Database {
-	var databaseURL string
-	db, err := sql.Open("postgres", databaseURL)
+func SetupDB(t *testing.T, cfg config.Config) *service.Database {
+	var databaseURL = cfg.Database.GetURL()
+	db, err := sql.Open("mysql", databaseURL)
 	require.NoError(t, err, "Error opening database")
 
-	return &service.Database{db}
+	return &service.Database{DB: db}
 }
