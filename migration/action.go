@@ -22,14 +22,13 @@ func (_ *Logger) Verbose() bool {
 }
 
 type FileMigration struct {
-	Host     string
-	Port     uint
-	User     string
-	Password string
-	Name     string
-	Charset  string
-	Versions string
-
+	Host      string
+	Port      uint
+	User      string
+	Password  string
+	Name      string
+	Charset   string
+	Versions  string
 	SourceUrl string
 }
 
@@ -40,6 +39,7 @@ func NewFileMigration(c config.Database) *FileMigration {
 		User:     c.User,
 		Password: c.Password,
 		Name:     c.Name,
+		Charset:  c.Charset,
 	}
 }
 

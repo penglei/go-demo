@@ -26,7 +26,7 @@ do_task() {
 	hub_git_clone #clone and change work directory to git repo path
 
 	# init database migrate
-	vgo build cmd/*.go -o /go-demo
+	vgo build -o /go-demo cmd/*.go
 	/go-demo migrate up
 
 	# run test!
