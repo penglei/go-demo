@@ -7,8 +7,13 @@ export SCRIPTDIR="$( cd "$( dirname "$0" )" && pwd )"
 source $SCRIPTDIR/component-base/libs.sh
 
 wait_service() {
+	local time_out=$SVC_WAIT_TIMEOUT
+	if [ -z $time_out ];then
+		time_out=120
+	fi
+
 	echo "Wait MySQL..."
-	for i in `seq 1 30`;
+	for i in `seq 1 $time_out`;
 	do
 		nc -z localhost 3306 && echo Success && exit 0
 		echo -n .
@@ -19,7 +24,7 @@ wait_service() {
 }
 
 do_task() {
-	runsvdir /etc/sv > /dev/null 2>&1 &
+	runsvdir /etc/sv > /dev/null &
 
 	(wait_service)
 
