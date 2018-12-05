@@ -4,7 +4,7 @@ import "database/sql"
 
 // Contact describes a contact in our database.
 type Contact struct {
-	ID    int    `json:"id"`
+	ID    int64  `json:"id"`
 	Email string `json:"email"`
 	Name  string `json:"name"`
 }
@@ -12,8 +12,8 @@ type Contact struct {
 // ===== ADD CONTACT ===================================================================================================
 
 // AddContact inserts a new contact into the database.
-func (db *Database) AddContact(c Contact) (int, error) {
-	var contactID int
+func (db *Database) AddContact(c Contact) (int64, error) {
+	var contactID int64
 	err := db.Write(func(tx *Transaction) {
 		contactID = tx.AddContact(c)
 	})
@@ -22,15 +22,18 @@ func (db *Database) AddContact(c Contact) (int, error) {
 }
 
 // AddContact inserts a new contact within the transaction.
-func (tx *Transaction) AddContact(c Contact) int {
-	row := tx.QueryRow(
-		"INSERT INTO contacts (email, name) VALUES ($1, $2)",
+func (tx *Transaction) AddContact(c Contact) int64 {
+	rs, err := tx.Exec(
+		"INSERT INTO contacts (email, name) VALUES (?, ?)",
 		c.Email,
 		c.Name,
 	)
+	if err != nil {
+		panic(err)
+	}
 
-	var id int
-	if err := row.Scan(&id); err != nil {
+	id, err := rs.LastInsertId()
+	if err != nil {
 		panic(err)
 	}
 
@@ -52,7 +55,7 @@ func (db *Database) GetContactByEmail(email string) (*Contact, error) {
 // GetContactByEmail finds a contact given an email address. `nil` is returned if the Contact doesn't exist in the DB.
 func (tx *Transaction) GetContactByEmail(email string) *Contact {
 	row := tx.QueryRow(
-		"SELECT id, email, name FROM contacts WHERE email = $1",
+		"SELECT id, email, name FROM contacts WHERE email = ?",
 		email,
 	)
 

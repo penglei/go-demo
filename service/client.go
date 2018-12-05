@@ -147,7 +147,7 @@ func (c *DefaultClient) AddContact(contact AddContactRequest) (*Contact, error) 
 //GetContactByEmail return email in the contact
 func (c *DefaultClient) GetContactByEmail(email string) (*Contact, error) {
 	var response ContactResponse
-	var path = fmt.Sprintf("/contacts/%v", url.QueryEscape(email))
+	var path = fmt.Sprintf("/contacts/%v", url.PathEscape(email))
 	err := c.performRequestMethod(http.MethodGet, path, nil, nil, &response)
 	if err != nil {
 		return nil, err

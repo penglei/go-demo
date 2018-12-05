@@ -41,21 +41,22 @@ func Test_GetContactByEmail(t *testing.T) {
 	env := test.SetupEnv(t)
 	defer env.Close()
 
+	var email = "alice2@example.xyz"
 	// SETUP:
-	env.SetupContact("alice@example.xyz", "Alice Zulu")
+	env.SetupContact(email, "Alice Zulu")
 
 	// -------------------------------------------------------------------------------------------------------------
 	// TEST: when contact exists
 	{
 		// Using braces like this can help isolate different test cases.
 
-		contact, err := env.Client.GetContactByEmail("alice@example.xyz")
+		contact, err := env.Client.GetContactByEmail(email)
 
 		// VERIFY: Response contains the contact
 		require.NoError(t, err, "Unable to get contact via API")
 		require.NotEmpty(t, contact, "Contact not found")
 		assert.True(t, contact.ID > 0, "Contact ID is missing")
-		assert.Equal(t, contact.Email, "alice@example.xyz")
+		assert.Equal(t, contact.Email, email)
 		assert.Equal(t, contact.Name, "Alice Zulu")
 	}
 

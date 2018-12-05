@@ -102,7 +102,7 @@ func (s *Server) AddContact(c echo.Context) error {
 //GetContactByEmail handles HTTP requests to GET a Contact by an email address.
 func (s *Server) GetContactByEmail(c echo.Context) error {
 	// (w http.ResponseWriter, r *http.Request, ps httprouter.Params)
-	var email = strings.TrimSpace(c.QueryParam("email"))
+	var email = strings.TrimSpace(c.Param("email"))
 	if email == "" {
 		return errors.New("expected a single email")
 	}
