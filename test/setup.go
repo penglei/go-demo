@@ -3,7 +3,7 @@ package test
 import (
 	"database/sql"
 	"flag"
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql" //comment for lint
 	"github.com/qcloud2018/go-demo/config"
 	"github.com/qcloud2018/go-demo/logger"
 	"github.com/qcloud2018/go-demo/service"

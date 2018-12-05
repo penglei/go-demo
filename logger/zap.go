@@ -9,7 +9,7 @@ var level = zap.NewAtomicLevelAt(zapcore.InfoLevel)
 
 // var logger *zap.Logger
 
-// InitLogger 初始化全局 logger 并将其设置为 zap 的默认 logger
+//InitZapLogger 初始化全局 logger 并将其设置为 zap 的默认 logger
 // 使用 logger 的地方只需要 zap.L().XXX() 就可以了
 func InitZapLogger(env, logLevel, format string, opts ...zap.Option) error {
 	var conf zap.Config
@@ -49,17 +49,17 @@ func InitZapLogger(env, logLevel, format string, opts ...zap.Option) error {
 	return nil
 }
 
-// 设置全局 Logger 对应的级别
-// 这个函数是并发安全的
+//SetLevel 设置全局 Logger 对应的级别, 这个函数是线程安全的
 func SetLevel(lv zapcore.Level) {
 	level.SetLevel(lv)
 }
 
-// 获取全局 Logger 的级别
+//GetLevel 获取全局 Logger 的级别
 func GetLevel() zapcore.Level {
 	return level.Level()
 }
 
+//NoStacktrace 将禁用非FatalLevel的Log调用
 func NoStacktrace(l *zap.Logger) *zap.Logger {
 	return l.WithOptions(zap.AddStacktrace(zap.FatalLevel))
 }

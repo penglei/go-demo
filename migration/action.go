@@ -3,24 +3,26 @@ package migration
 import (
 	"fmt"
 	"github.com/golang-migrate/migrate"
-	_ "github.com/golang-migrate/migrate/database/mysql"
+	_ "github.com/golang-migrate/migrate/database/mysql" // for mysql
 	_ "github.com/golang-migrate/migrate/source/file"
 	"github.com/qcloud2018/go-demo/config"
 	"go.uber.org/zap"
 	"net/url"
 )
 
-type Logger struct{}
+type logger struct{}
 
-func (_ *Logger) Printf(format string, v ...interface{}) {
+//Printf implement
+func (*logger) Printf(format string, v ...interface{}) {
 	var l = zap.L().Sugar()
 	l.Infof(format, v)
 }
 
-func (_ *Logger) Verbose() bool {
+func (*logger) Verbose() bool {
 	return true
 }
 
+//FileMigration is a migration config that contains source file and MySQL connect information
 type FileMigration struct {
 	Host      string
 	Port      uint
@@ -29,9 +31,10 @@ type FileMigration struct {
 	Name      string
 	Charset   string
 	Versions  string
-	SourceUrl string
+	SourceURL string
 }
 
+//NewFileMigration create a migration from the source file
 func NewFileMigration(c config.Database) *FileMigration {
 	return &FileMigration{
 		Host:     c.Host,
@@ -45,23 +48,24 @@ func NewFileMigration(c config.Database) *FileMigration {
 
 func (m *FileMigration) create() *migrate.Migrate {
 	var l = zap.L()
-	var sourceUrl = fmt.Sprintf("file://%s", m.Versions)
-	var dbUrl string
+	var sourceURL = fmt.Sprintf("file://%s", m.Versions)
+	var dbURL string
 	var userInfo = url.UserPassword(m.User, m.Password).String()
-	dbUrl = fmt.Sprintf("mysql://%s@tcp(%s:%d)/%s?charset=%s",
+	dbURL = fmt.Sprintf("mysql://%s@tcp(%s:%d)/%s?charset=%s",
 		userInfo, m.Host, m.Port, m.Name, m.Charset)
 
-	l.Info("migrate from versions in directory", zap.String("sourceUrl", sourceUrl))
-	l.Info("migrate target database", zap.String("dbUrl", dbUrl))
-	migrateInstance, err := migrate.New(sourceUrl, dbUrl)
+	l.Info("migrate from versions in directory", zap.String("sourceURL", sourceURL))
+	l.Info("migrate target database", zap.String("dbURL", dbURL))
+	migrateInstance, err := migrate.New(sourceURL, dbURL)
 	if err != nil {
 		l.Fatal("create migrate connection failed", zap.Error(err))
 	}
-	migrateInstance.Log = &Logger{}
-	m.SourceUrl = sourceUrl
+	migrateInstance.Log = &logger{}
+	m.SourceURL = sourceURL
 	return migrateInstance
 }
 
+//Upgrade will upgrade the latest version
 func (m *FileMigration) Upgrade() {
 	var l = zap.L()
 	l.Info("do upgrade...")
@@ -80,6 +84,7 @@ func (m *FileMigration) Upgrade() {
 	}
 }
 
+//Downgrade will revert to last version
 func (m *FileMigration) Downgrade() {
 	var l = zap.L()
 	l.Info("do downgrade...")
@@ -94,6 +99,7 @@ func (m *FileMigration) Downgrade() {
 	}
 }
 
+//ForceResetDown will force downgrade last version
 func (m *FileMigration) ForceResetDown() {
 	var l = zap.L()
 	var migrateInstance = m.create()

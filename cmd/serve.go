@@ -23,7 +23,7 @@ var serveCmd = &cobra.Command{
 
 func runServer() {
 
-	db := SetupDB(conf.Database)
+	db := setupDB(conf.Database)
 	server := service.NewServer(db)
 	http.HandleFunc("/", server.ServeHTTP)
 
@@ -33,7 +33,7 @@ func runServer() {
 	}
 }
 
-func SetupDB(dbConf config.Database) *service.Database {
+func setupDB(dbConf config.Database) *service.Database {
 	databaseURL := dbConf.GetURL()
 	if databaseURL == "" {
 		panic("db config must be set!")
@@ -48,5 +48,5 @@ func SetupDB(dbConf config.Database) *service.Database {
 }
 
 func init() {
-	RootCmd.AddCommand(serveCmd)
+	rootCmd.AddCommand(serveCmd)
 }

@@ -18,17 +18,17 @@ import (
 var versionsDir string
 
 const (
-	ACTION_UP     = "up"
-	ACTION_DOWN   = "down"
-	ACTION_NEW    = "new"
-	MAX_TITLE_LEN = 40
+	migrateActionUp    = "up"
+	migrateActionDown  = "down"
+	migrateActionNew   = "new"
+	migrateMaxTitleLen = 40
 )
 
 var migrateCmd = &cobra.Command{
 	Use:       "migrate [<action>(up|down|new)] [flags]\n\nDefault Args: \n ",
 	Short:     "Update database",
 	Long:      `Update database with version files.`,
-	ValidArgs: []string{ACTION_UP, ACTION_DOWN, ACTION_NEW},
+	ValidArgs: []string{migrateActionUp, migrateActionDown, migrateActionNew},
 	Args:      cobra.OnlyValidArgs,
 
 	Run: func(cmd *cobra.Command, args []string) {
@@ -54,13 +54,13 @@ func runMigrate(action string, cmd *cobra.Command) {
 
 	m.Versions = absPath
 
-	if action == ACTION_UP {
+	if action == migrateActionUp {
 		// m.Upgrade(uint(steps))
 		m.Upgrade()
-	} else if action == ACTION_DOWN {
+	} else if action == migrateActionDown {
 		// m.Downgrade(uint(steps))
 		m.Downgrade()
-	} else if action == ACTION_NEW {
+	} else if action == migrateActionNew {
 		var now = time.Now()
 		var timeStr = now.Format("20060102150405")
 		title, err := cmd.Flags().GetString("title")
@@ -68,8 +68,8 @@ func runMigrate(action string, cmd *cobra.Command) {
 		if err != nil {
 			l.Error("error while parsing params title", zap.Error(err))
 		}
-		if len(title) > MAX_TITLE_LEN {
-			shortTitle = title[:MAX_TITLE_LEN]
+		if len(title) > migrateMaxTitleLen {
+			shortTitle = title[:migrateMaxTitleLen]
 		} else {
 			shortTitle = title
 		}
@@ -107,7 +107,7 @@ func runMigrate(action string, cmd *cobra.Command) {
 }
 
 func init() {
-	RootCmd.AddCommand(migrateCmd)
+	rootCmd.AddCommand(migrateCmd)
 	migrateCmd.Flags().StringVarP(&versionsDir, "versions", "v", "./migration/versions", "version files directory")
 	// migrateCmd.Flags().IntVarP(&steps, "step", "s", 2, "steps")
 	migrateCmd.Flags().StringP("host", "H", "", "database host address")

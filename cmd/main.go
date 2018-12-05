@@ -12,13 +12,13 @@ import (
 
 var conf config.Config
 
-var RootCmd = &cobra.Command{
+var rootCmd = &cobra.Command{
 	Use:   "go-demo",
 	Short: "demo application",
 	Long:  "a pipeline demo web application",
 }
 
-func SetViperConfig(cfgFile string, name string, envPrefix string) error {
+func setViperConfig(cfgFile string, name string, envPrefix string) error {
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
@@ -48,7 +48,7 @@ func SetViperConfig(cfgFile string, name string, envPrefix string) error {
 func main() {
 	var cfgFile string
 	cobra.OnInitialize(func() {
-		var err = SetViperConfig(cfgFile, "go-demo", "GO_DEMO")
+		var err = setViperConfig(cfgFile, "go-demo", "GO_DEMO")
 		if err != nil {
 			panic(err)
 		}
@@ -62,9 +62,9 @@ func main() {
 		}
 	})
 
-	RootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "main config file ")
+	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "main config file ")
 
-	if err := RootCmd.Execute(); err != nil {
+	if err := rootCmd.Execute(); err != nil {
 		zap.L().Fatal("command exit error", zap.Error(err))
 	}
 }
