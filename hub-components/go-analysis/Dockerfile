@@ -9,5 +9,6 @@ ENTRYPOINT /entrypoint.sh
 
 RUN apk add --no-cache git bash openssh-client && go get -u github.com/golang/lint/golint && mkdir /root/.ssh && chmod 0700 /root/.ssh
 
+ADD component-base/libs.sh /component-base/
 ADD ./*.sh /
 
