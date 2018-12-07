@@ -29,6 +29,7 @@ init_kubectl_config() {
 create_mysql_deployment() {
 
 	local mysql_root_password=`hub_var MYSQL_ROOT_PASSWORD true`
+	local node_name=`hub_var TKE_MYSQL_NODE_NAME true`
 
 #cat <<EOF | kubectl create -f -
 #EOF
@@ -68,7 +69,7 @@ spec:
         hostPath:
           path: /data/go-demo/mysql
           type: DirectoryOrCreate
-      nodeName: "172.27.100.24"
+      nodeName: "$node_name"
       containers:
       - name: mysql
         image: mysql:5.7
