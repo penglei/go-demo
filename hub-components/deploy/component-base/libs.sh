@@ -54,3 +54,8 @@ hub_git_clone() {
   cd $GIT_REPO_DIR
   git checkout "$GIT_REPO_REF" --
 }
+
+sedPath() {
+  path=$((echo $1|sed -E 's/([\$\.\*\/\[\\^])/\\\1/g'|sed 's/[]]/\[]]/g')>&1)
+  echo "$path"
+}

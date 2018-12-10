@@ -14,22 +14,21 @@ spec:
       labels:
         app: go-demo-web
     spec:
+      imagePullSecrets:
+      - name: myhubsecret
       volumes:
       - name: config
         configMap:
-          defaultMode: 420
           name: go-demo-config
       containers:
       - name: go-demo
         image: "{{docker_image}}" # hub.tencentyun.com/workshop/go-demo # TODO from args
         command: ["/go-demo"]
-        args: ["serve", "-c /etc/go-demo/config.yaml"]
+        args: ["-c", "/etc/go-demo/config.yaml", "serve"]
         ports:
         - containerPort: 8080
         volumeMounts:
-        - name: go-demo-config
-          mountPath: /etc/go-demo
-
-# kubectl create configmap go-demo-config --from-file=config/ -n test
-# kubectl create configmap go-demo-config --from-file=config/ -n prod
+        - name: config
+          mountPath: /etc/go-demo/config.yaml
+          subPath: config.yaml
 

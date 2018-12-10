@@ -6,16 +6,16 @@
 #   hub.tencentyun.com/workshop/deploy
 #
 
-set -e
+set -e -x
 export SCRIPTDIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 
 source $SCRIPTDIR/component-base/libs.sh
 
-
 replace_template() {
 	local file_path="$1"
-	local key="$2"
-	local val="$3"
+	local key="$(sedPath $2)"	
+	local val="$(sedPath $3)"
+
 	sed -i.bak -E "s/\\{\\{$key\\}\\}/$val/g" $file_path
 	rm $file_path.bak
 }
@@ -42,7 +42,7 @@ create_configmap() {
 	local namespace="$1"
 	kubectl delete configmap go-demo-config -n "$namespace" || true
 
-	replace_template k8s/config/go-demo.yaml db_name "$2"
+	replace_template k8s/config/config.yaml db_name "$2"
 
 	#XXX 可以在这里替换配置
 	kubectl create configmap go-demo-config --from-file=k8s/config/ -n "$namespace"
@@ -52,7 +52,7 @@ create_deployment() {
 	local namespace="$1"
 	local tke_docker_image=`hub_var TKE_DOCKER_IMAGE`
 
-	replace_template k8s/config/deployment.yaml docker_image "$tke_docker_image"
+	replace_template k8s/deployment.yaml docker_image "$tke_docker_image"
 	# upgrade deployment
 	kubectl apply -f k8s/deployment.yaml -n "$namespace"
 }
@@ -77,7 +77,7 @@ do_database_migrate() {
 		"stdinOnce": true,
 		"tty": true,
 		"command": ["/go-demo"],
-		"args": ["-c", "/go-demo-config/go-demo.yaml", "migrate", "up"],
+		"args": ["-c", "/go-demo-config/config.yaml", "migrate", "up"],
 		"workingDir": "/go/src/github.com/qcloud2018/go-demo",
 		"volumeMounts": [{
 			"mountPath": "/go-demo-config",
