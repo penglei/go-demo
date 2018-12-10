@@ -20,7 +20,6 @@ replace_template() {
 	rm $file_path.bak
 }
 
-
 init_kubectl_config() {
 	local tke_server=`hub_var TKE_SERVER true`
 	local tke_username=`hub_default_var TKE_USERNAME admin`
@@ -51,16 +50,29 @@ create_deployment() {
 	kubectl apply -f k8s/deployment.yaml -n "$namespace"
 }
 
+do_database_migrate() {
+	local namespace="$1"
+	local tke_docker_image=`hub_var TKE_DOCKER_IMAGE`
+	kubectl run -it --rm --image="$tke_docker_image" --restart=Never --command=true migrate_database -n "$namespace" -- /go-demo migrate up
+}
+
 do_task() {
 	init_kubectl_config
-
 	local tke_namespace=`hub_var TKE_CLUSTER_NAMESPACE true`
 
-	# 创建service
-	create_service "$tke_namespace"
-	# 创建deploy
-	create_deployment "$tke_namespace"
+	local action=`hub_var TASK_ACTION true`
+	case "$action" in
+	migrate_database)
+		do_database_migrate
+		;;
+	upgrade_service)
+		# 创建service
+		create_service "$tke_namespace"
+		# 创建deploy
+		create_deployment "$tke_namespace"
+		;;
 
+	esac
 	echo "ok"
 }
 
