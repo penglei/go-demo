@@ -1,0 +1,11 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: go-demo-web
+spec:
+  selector:
+    app: go-demo-web
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
