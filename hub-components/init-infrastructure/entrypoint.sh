@@ -128,10 +128,25 @@ metadata:
 EOF
 }
 
+create_image_secret() {
+	local hub_user=`hub_var HUB_USER true`
+	local hub_token=`hub_var HUB_TOKEN true`
+
+	namespaces=("test" "prod" "default")
+	for ns in ${namespaces[@]}; do
+	kubectl create secret \
+		docker-registry myhubsecret \
+		--docker-server=hub.tencentyun.com \
+		--docker-username="$hub_user" \
+		--docker-password="$hub_token" \
+		-n "$ns" || true
+	done
+}
+
 do_task() {
 	init_kubectl_config
-	kubectl get nodes
 	create_mysql_deployment
+	create_image_secret
 	echo "ok"
 }
 

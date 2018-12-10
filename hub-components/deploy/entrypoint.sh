@@ -38,14 +38,21 @@ create_service() {
 	cat k8s/service.yaml | kubectl apply -n "$namespace" -f -
 }
 
+create_configmap() {
+	local namespace="$1"
+	kubectl delete configmap go-demo-config -n "$namespace" || true
+
+	replace_template k8s/config/go-demo.yaml db_name "$2"
+
+	#XXX 可以在这里替换配置
+	kubectl create configmap go-demo-config --from-file=k8s/config/ -n "$namespace"
+}
+
 create_deployment() {
 	local namespace="$1"
 	local tke_docker_image=`hub_var TKE_DOCKER_IMAGE`
-	replace_template config/deployment.yaml docker_image "$tke_docker_image"
-	# update configmap
-	kubectl delete configmap go-demo-config || true
-	kubectl create configmap go-demo-config --from-file=config/ -n "$namespace"
 
+	replace_template k8s/config/deployment.yaml docker_image "$tke_docker_image"
 	# upgrade deployment
 	kubectl apply -f k8s/deployment.yaml -n "$namespace"
 }
@@ -53,7 +60,35 @@ create_deployment() {
 do_database_migrate() {
 	local namespace="$1"
 	local tke_docker_image=`hub_var TKE_DOCKER_IMAGE`
-	kubectl run -it --rm --image="$tke_docker_image" --restart=Never --command=true migrate_database -n "$namespace" -- /go-demo migrate up
+	# create configmap
+	local yaml=$(cat <<EOF
+{ "apiVersion": "v1", "spec": {
+	"imagePullSecrets": [{"name": "myhubsecret"}],
+	"volumes":[{
+		"name": "config",
+		"configMap": {
+			"name": "go-demo-config"
+		}
+	}],
+	"containers": [{
+		"name": "migrate-database",
+		"image": "$tke_docker_image",
+		"stdin": true,
+		"stdinOnce": true,
+		"tty": true,
+		"command": ["/go-demo"],
+		"args": ["-c", "/go-demo-config/go-demo.yaml", "migrate", "up"],
+		"workingDir": "/go/src/github.com/qcloud2018/go-demo",
+		"volumeMounts": [{
+			"mountPath": "/go-demo-config",
+			"name": "config"
+		}]
+	}]
+} }
+
+EOF
+)
+	kubectl run -it --rm --image="$tke_docker_image" --restart=Never --command=true --pod-running-timeout=2m migrate-database -n "$namespace" --overrides="$yaml"
 }
 
 do_task() {
@@ -61,9 +96,12 @@ do_task() {
 	local tke_namespace=`hub_var TKE_CLUSTER_NAMESPACE true`
 
 	local action=`hub_var TASK_ACTION true`
+
+	create_configmap "$tke_namespace" "go-demo-$tke_namespace"
+
 	case "$action" in
 	migrate_database)
-		do_database_migrate
+		do_database_migrate "$tke_namespace"
 		;;
 	upgrade_service)
 		# 创建service

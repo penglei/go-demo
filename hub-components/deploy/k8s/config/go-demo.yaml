@@ -3,9 +3,9 @@ logLevel: debug
 logFormat: console
 
 database:
-  host: mysql
+  host: mysql.default
   port: 3306
-  name: go-demo
+  name: {{db_name}}
   user: root
   password: "123456"
   charset: utf8

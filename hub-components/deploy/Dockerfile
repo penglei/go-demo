@@ -12,5 +12,5 @@ echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/s
 apt-get update && apt-get install -y kubectl && rm -rf /var/lib/apt/lists/*
 
 ADD component-base/libs.sh /component-base/
+ADD k8s /k8s
 ADD ./*.sh /
-
