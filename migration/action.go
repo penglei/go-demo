@@ -73,7 +73,7 @@ func (m *FileMigration) Upgrade() {
 	var err = migrateInstance.Up()
 	if err != nil {
 		if err == migrate.ErrNoChange {
-			l.Warn("migrate.ErrNoChange", zap.Error(err))
+			l.Info("migration no change")
 		} else if _, ok := err.(migrate.ErrDirty); ok {
 			l.Error("Last migration failed, you must solve the database state problem and try again！")
 		} else {
