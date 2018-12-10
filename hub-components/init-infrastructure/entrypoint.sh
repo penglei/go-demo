@@ -8,7 +8,7 @@
 #   hub.tencentyun.com/workshop/go-analysis
 #
 
-set -e
+set -e -x
 export SCRIPTDIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 
 source $SCRIPTDIR/component-base/libs.sh
@@ -134,12 +134,13 @@ create_image_secret() {
 
 	namespaces=("test" "prod" "default")
 	for ns in ${namespaces[@]}; do
-	kubectl create secret \
-		docker-registry myhubsecret \
+	kubectl delete secret myhubsecret -n "$ns" || true
+	kubectl create secret docker-registry myhubsecret \
 		--docker-server=hub.tencentyun.com \
 		--docker-username="$hub_user" \
 		--docker-password="$hub_token" \
-		-n "$ns" || true
+		--docker-email="foo@test.local" \
+		-n "$ns"
 	done
 }
 

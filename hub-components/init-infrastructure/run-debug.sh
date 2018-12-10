@@ -24,6 +24,6 @@ NtJavX/w7IQ=
 -e TKE_USERNAME='admin' \
 -e TKE_MYSQL_NODE_NAME="172.27.100.24" \
 -e MYSQL_ROOT_PASSWORD="123456" \
---rm -it init-infrastructure
+--rm -it hub.tencentyun.com/workshop/init-infrastructure
 
 #--entrypoint bash
