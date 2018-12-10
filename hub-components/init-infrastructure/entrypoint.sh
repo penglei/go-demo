@@ -105,9 +105,14 @@ create_test_and_prod_database "$mysql_root_password"
 create_test_and_prod_database() {
 	local mysql_root_password="$1"
 	kubectl delete pod wait-mysql-ready mysql-client > /dev/null 2>&1 || true
-	kubectl run -i --tty --rm --image=busybox --restart=Never --command=true wait-mysql-ready -- sh -c 'for i in `seq 1 30`; do nc -z mysql 3306 && echo success && exit 0; echo -n .;  sleep 1; done' | grep 'success' || (echo error: mysql not ready. ; exit 1)
+	local result=$(kubectl run -it --rm --image=busybox --restart=Never --command=true wait-mysql-ready -- sh -c 'for i in `seq 1 30`; do nc -z mysql 3306 && echo success && exit 0; echo -n .;  sleep 1; done')
+	#kubectl delete pod wait-mysql-ready > /dev/null 2>&1 || true
+	echo "$result" | grep 'success' > /dev/null 2>&1 || (echo error: mysql not ready. ; exit 1)
+
 	# 创建测试和生产用的数据库
-	kubectl run -i --tty --rm --image=mysql:5.7 --restart=Never --command=true mysql-client -- mysql -u root -h mysql -p"$mysql_root_password" -e "create database  if not exists go-demo-test; create database if not exists go-demo-prod; show databases;"
+	kubectl run -it --rm --image=mysql:5.7 --restart=Never --command=true mysql-client -- mysql -u root -h mysql -p"$mysql_root_password" -e "create database if not exists \`go-demo-test\`; create database if not exists \`go-demo-prod\`; show databases;"
+
+	# kubectl delete pod mysql-client > /dev/null 2>&1 || true
 
 	# 创建测试和生产命名空间
 kubectl apply -f - <<EOF
