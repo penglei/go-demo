@@ -108,6 +108,7 @@ do_task() {
 		create_service "$tke_namespace"
 		# 创建deploy
 		create_deployment "$tke_namespace"
+		kubectl get svc -n "$tke_namespace"
 		;;
 
 	esac
