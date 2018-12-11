@@ -1,0 +1,296 @@
+namespace: workshop
+repo: go-demo
+name: master_continuous_delivery
+desc: ''
+timeout: 60
+env:
+    -
+        name: GIT_REPO_DIR
+        value: /go/src/github.com/qcloud2018/go-demo
+    -
+        name: TKE_SERVER
+        value: 'https://cls-********.ccs.tencent-cloud.com'
+    -
+        name: TKE_PASSWORD
+        value: 5******************************x
+    -
+        name: TKE_USERNAME
+        value: admin
+    -
+        name: MYSQL_ROOT_PASSWORD
+        value: '123456'
+    -
+        name: TKE_CERTIFICATE
+        value: |-
+            -----BEGIN CERTIFICATE-----
+            ****************************************************************
+            ****************************************************************
+            ****************************************************************
+            ****************************************************************
+            ****************************************************************
+            ****************************************************************
+            ****************************************************************
+            ****************************************************************
+            ****************************************************************
+            ****************************************************************
+            ****************************************************************
+            ****************************************************************
+            ****************************************************************
+            ****************************************************************
+            ****************************************************************
+            ****************************************************************
+            ****************************************************************
+            ****************************************************************
+            ************
+            -----END CERTIFICATE-----
+stages:
+    -
+        name: style_check
+        desc: ''
+        sequencing: parallel
+        type: normal
+        jobs:
+            -
+                name: lint
+                component: 'hub.tencentyun.com/workshop/go-analysis:v0.0.2'
+                allow_failure: false
+                retry: 0
+                when: ''
+                inputs:
+                    -
+                        name: GIT_REPO_DIR
+                        value: /go/src/github.com/qcloud2018/go-demo
+                    -
+                        name: NO_CACHE
+                        value: NO_CACHE
+            -
+                name: unit_test
+                component: 'hub.tencentyun.com/workshop/go-test-env:latest'
+                allow_failure: false
+                retry: 0
+                when: ''
+                inputs:
+                    -
+                        name: MYSQL_ROOT_PASSWORD
+                        value: '123456'
+                    -
+                        name: MYSQL_DATABASE
+                        value: go-demo
+                    -
+                        name: NO_CACHE
+                        value: 'false'
+    -
+        name: build
+        desc: ''
+        sequencing: sequence
+        type: normal
+        jobs:
+            -
+                name: build_docker_image
+                component: 'hub.tencentyun.com/tencenthub/thub_docker_builder:latest'
+                allow_failure: false
+                retry: 0
+                when: ''
+                inputs:
+                    -
+                        name: IMAGE_TAG_FORMAT
+                        value: $branch-$commit-$time
+                    -
+                        name: BUILD_WORKDIR
+                        value: .
+                    -
+                        name: DOCKERFILE_PATH
+                        value: Dockerfile
+                    -
+                        name: NO_CACHE
+                        value: 'false'
+                    -
+                        name: EXTRA_IMAGE_TAG
+                        value: latest
+                    -
+                        name: _WORKFLOW_BUILD_TYPE
+                        value: auto
+    -
+        name: notice_qa
+        desc: ''
+        sequencing: sequence
+        type: pause
+        jobs:
+            -
+                name: _workflow_notice_job_2_notice_qa
+                component: 'hub.tencentyun.com/tencenthub/notice_email:latest'
+                allow_failure: true
+                retry: 0
+                inputs:
+                    -
+                        name: FROM_USER
+                        value: 9*******3@qq.com
+                    -
+                        name: TO_USERS
+                        value: foo*****@test.local
+                    -
+                        name: SECRET
+                        value: a**************f
+                    -
+                        name: SMTP_SERVER_PORT
+                        value: 'smtp.qq.com:465'
+                    -
+                        name: SUBJECT
+                        value: master 提交新版本，待测试
+                    -
+                        name: TEXT
+                        value: master 提交新版本，待测试
+                    -
+                        name: _WORKFLOW_FLAG_PAUSE_NOTICE
+                        value: 'true'
+            -
+                name: _workflow_pause_job_2_notice_qa
+                component: 'hub.tencentyun.com/tencenthub/workflow_pause:latest'
+                allow_failure: false
+                retry: 0
+                timeout: 300
+    -
+        name: deploy_to_test
+        desc: ''
+        sequencing: sequence
+        type: normal
+        jobs:
+            -
+                name: migrate_db_test
+                component: 'hub.tencentyun.com/workshop/deploy:latest'
+                allow_failure: false
+                retry: 0
+                when: ''
+                inputs:
+                    -
+                        name: TKE_DOCKER_IMAGE
+                        value: '${build_docker_image.IMAGE_WITH_TAG}'
+                    -
+                        name: TASK_ACTION
+                        value: migrate_database
+                    -
+                        name: TKE_CLUSTER_NAMESPACE
+                        value: test
+            -
+                name: kube_deploy_test
+                component: 'hub.tencentyun.com/workshop/deploy:latest'
+                allow_failure: false
+                retry: 0
+                when: ''
+                inputs:
+                    -
+                        name: TKE_DOCKER_IMAGE
+                        value: '${build_docker_image.IMAGE_WITH_TAG}'
+                    -
+                        name: TASK_ACTION
+                        value: upgrade_service
+                    -
+                        name: TKE_CLUSTER_NAMESPACE
+                        value: test
+    -
+        name: notice_op
+        desc: ''
+        sequencing: sequence
+        type: pause
+        jobs:
+            -
+                name: _workflow_notice_job_4_notice_op
+                component: 'hub.tencentyun.com/tencenthub/notice_email:latest'
+                allow_failure: true
+                retry: 0
+                inputs:
+                    -
+                        name: FROM_USER
+                        value: 9*******3@qq.com
+                    -
+                        name: TO_USERS
+                        value: p**************rg
+                    -
+                        name: SECRET
+                        value: a**************f
+                    -
+                        name: SMTP_SERVER_PORT
+                        value: 'smtp.qq.com:465'
+                    -
+                        name: SUBJECT
+                        value: master通过测试，请求部署
+                    -
+                        name: TEXT
+                        value: master通过测试，请求部署
+                    -
+                        name: _WORKFLOW_FLAG_PAUSE_NOTICE
+                        value: 'true'
+            -
+                name: _workflow_pause_job_4_notice_op
+                component: 'hub.tencentyun.com/tencenthub/workflow_pause:latest'
+                allow_failure: false
+                retry: 0
+                timeout: 300
+    -
+        name: deploy_to_production
+        desc: ''
+        sequencing: sequence
+        type: normal
+        jobs:
+            -
+                name: migrate_db_prod
+                component: 'hub.tencentyun.com/workshop/deploy:latest'
+                allow_failure: false
+                retry: 0
+                when: ''
+                inputs:
+                    -
+                        name: TKE_DOCKER_IMAGE
+                        value: '${build_docker_image.IMAGE_WITH_TAG}'
+                    -
+                        name: TASK_ACTION
+                        value: migrate_database
+                    -
+                        name: TKE_CLUSTER_NAMESPACE
+                        value: prod
+            -
+                name: kube_deploy_prod
+                component: 'hub.tencentyun.com/workshop/deploy:latest'
+                allow_failure: false
+                retry: 0
+                when: ''
+                inputs:
+                    -
+                        name: TKE_DOCKER_IMAGE
+                        value: '${build_docker_image.IMAGE_WITH_TAG}'
+                    -
+                        name: TASK_ACTION
+                        value: upgrade_service
+                    -
+                        name: TKE_CLUSTER_NAMESPACE
+                        value: prod
+    -
+        name: _workflow_notice_stage
+        desc: ''
+        sequencing: sequence
+        type: end
+        jobs:
+            -
+                name: _workflow_notice_email
+                component: 'hub.tencentyun.com/tencenthub/notice_email:latest'
+                allow_failure: true
+                retry: 0
+                when: always
+                inputs:
+                    -
+                        name: FROM_USER
+                        value: ''
+                    -
+                        name: TO_USERS
+                        value: ''
+                    -
+                        name: SMTP_SERVER_PORT
+                        value: ''
+                    -
+                        name: SECRET
+                        value: ''
+                    -
+                        name: _WORKFLOW_FLAG_TASK_DETAIL
+                        value: 'true'
+
+

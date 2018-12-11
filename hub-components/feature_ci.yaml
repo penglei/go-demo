@@ -1,0 +1,79 @@
+namespace: workshop
+repo: go-demo
+name: feature_ci
+desc: ''
+timeout: 60
+env:
+    -
+        name: GIT_REPO_DIR
+        value: /go/src/github.com/qcloud2018/go-demo
+        desc: Go project clone directory
+stages:
+    -
+        name: code_analysis
+        desc: ''
+        sequencing: parallel
+        type: normal
+        jobs:
+            -
+                name: lint
+                component: 'hub.tencentyun.com/workshop/go-analysis:v0.0.2'
+                allow_failure: false
+                retry: 0
+                when: ''
+                inputs:
+                    -
+                        name: GIT_REPO_DIR
+                        value: /go/src/github.com/qcloud2018/go-demo
+    -
+        name: unit_test
+        desc: ''
+        sequencing: sequence
+        type: normal
+        jobs:
+            -
+                name: unit_test
+                component: 'hub.tencentyun.com/workshop/go-test-env:latest'
+                allow_failure: false
+                retry: 0
+                when: ''
+                inputs:
+                    -
+                        name: SVC_WAIT_TIMEOUT
+                        value: '500'
+                    -
+                        name: MYSQL_ROOT_PASSWORD
+                        value: '123456'
+                    -
+                        name: MYSQL_DATABASE
+                        value: go-demo
+    -
+        name: _workflow_notice_stage
+        desc: ''
+        sequencing: sequence
+        type: end
+        jobs:
+            -
+                name: _workflow_notice_email
+                component: 'hub.tencentyun.com/tencenthub/notice_email:latest'
+                allow_failure: true
+                retry: 0
+                when: on_failure
+                inputs:
+                    -
+                        name: FROM_USER
+                        value: ''
+                    -
+                        name: TO_USERS
+                        value: ''
+                    -
+                        name: SMTP_SERVER_PORT
+                        value: ''
+                    -
+                        name: SECRET
+                        value: ''
+                    -
+                        name: _WORKFLOW_FLAG_TASK_DETAIL
+                        value: 'true'
+
+
