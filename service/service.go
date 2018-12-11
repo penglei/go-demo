@@ -3,9 +3,11 @@ package service
 import (
 	"encoding/json"
 	"errors"
-	"github.com/labstack/echo"
+	"html/template"
 	"net/http"
 	"strings"
+
+	"github.com/labstack/echo"
 )
 
 // NewServer initializes the service with the given Database, and sets up appropriate routes.
@@ -39,35 +41,58 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) setupRoutes() {
+	type Data struct {
+		Message string
+	}
+	t, err := template.New("index_template").Parse(`
+<html>
+<head>
+<title>go-demo home page</title>
+</head>
+<body style="background-color:red;">{{.Message}}</body>
+</html>
+`)
+
+	if err != nil {
+		panic(err)
+	}
+
 	s.router.POST("/contacts", s.AddContact)
 	s.router.GET("/contacts/:email", s.GetContactByEmail)
+	s.router.GET("/", func(c echo.Context) error {
+		err := t.Execute(c.Response().Writer, Data{Message: "hello, this is index of go-demo"})
+		if err == nil {
+			c.Response().Committed = true
+		}
+		return err
+	})
 
 	// By default the router will handle errors. But the service should always return JSON if possible, so these
 	// custom handlers are added.
 
 	/*
-	s.router.NotFound = http.HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
-			writeJSONError(w, http.StatusNotFound, "")
-		},
-	)
+		s.router.NotFound = http.HandlerFunc(
+			func(w http.ResponseWriter, r *http.Request) {
+				writeJSONError(w, http.StatusNotFound, "")
+			},
+		)
 
-	s.router.HandleMethodNotAllowed = true
-	s.router.MethodNotAllowed = http.HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
-			writeJSONError(w, http.StatusMethodNotAllowed, "")
-		},
-	)
+		s.router.HandleMethodNotAllowed = true
+		s.router.MethodNotAllowed = http.HandlerFunc(
+			func(w http.ResponseWriter, r *http.Request) {
+				writeJSONError(w, http.StatusMethodNotAllowed, "")
+			},
+		)
 
-	s.router.PanicHandler = func(w http.ResponseWriter, r *http.Request, e interface{}) {
-		serverError, ok := e.(ServerError)
-		if ok {
-			writeJSONError(w, serverError.HttpStatusCode(), serverError.HttpStatusMessage())
-		} else {
-			log.Printf("Panic during request: %v", e)
-			writeJSONError(w, http.StatusInternalServerError, "")
+		s.router.PanicHandler = func(w http.ResponseWriter, r *http.Request, e interface{}) {
+			serverError, ok := e.(ServerError)
+			if ok {
+				writeJSONError(w, serverError.HttpStatusCode(), serverError.HttpStatusMessage())
+			} else {
+				log.Printf("Panic during request: %v", e)
+				writeJSONError(w, http.StatusInternalServerError, "")
+			}
 		}
-	}
 	*/
 }
 
