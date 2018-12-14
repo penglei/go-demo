@@ -129,19 +129,22 @@ EOF
 }
 
 create_image_secret() {
-	local hub_user=`hub_var HUB_USER true`
-	local hub_token=`hub_var HUB_TOKEN true`
+	#local hub_user=`hub_var HUB_USER true`
+	#local hub_token=`hub_var HUB_TOKEN true`
 
-	namespaces=("test" "prod" "default")
+	#namespaces=("test" "prod" "default")
+	namespaces=("test" "prod")
 	for ns in ${namespaces[@]}; do
-	kubectl delete secret myhubsecret -n "$ns" || true
-	kubectl create secret docker-registry myhubsecret \
-		--docker-server=hub.tencentyun.com \
-		--docker-username="$hub_user" \
-		--docker-password="$hub_token" \
-		--docker-email="foo@test.local" \
-		-n "$ns"
+	# kubectl delete secret myhubsecret -n "$ns" || true
+	# kubectl create secret docker-registry myhubsecret \
+	# 	--docker-server=hub.tencentyun.com \
+	# 	--docker-username="$hub_user" \
+	# 	--docker-password="$hub_token" \
+	# 	--docker-email="foo@test.local" \
+	# 	-n "$ns"
+	kubectl get secret tencenthubkey qcloudregistrykey -n default --export -o yaml|kubectl apply -n "$ns" -f -
 	done
+	#kubectl get secret tencenthubkey --namespace=default --export -o yaml  | kubectl apply -n test -f -
 }
 
 do_task() {
