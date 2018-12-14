@@ -49,7 +49,7 @@ func (s *Server) setupRoutes() {
 <head>
 <title>go-demo home page</title>
 </head>
-<body style="background-color:red;">{{.Message}}</body>
+<body style="background-color:blue;">{{.Message}}</body>
 </html>
 `)
 
