@@ -63,7 +63,7 @@ do_database_migrate() {
 	# create configmap
 	local yaml=$(cat <<EOF
 { "apiVersion": "v1", "spec": {
-	"imagePullSecrets": [{"name": "myhubsecret"}],
+	"imagePullSecrets": [{"name": "tencenthubkey"}],
 	"volumes":[{
 		"name": "config",
 		"configMap": {
