@@ -15,7 +15,7 @@ spec:
         app: go-demo-web
     spec:
       imagePullSecrets:
-      - name: myhubsecret
+      - name: tencenthubkey
       volumes:
       - name: config
         configMap:
