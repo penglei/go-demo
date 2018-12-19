@@ -3,3 +3,6 @@
 This example is modified from https://github.com/CircleCI-Public/circleci-demo-go.
 
 This is an example application showcasing how to run Go on TencentHub.
+
+# Test
+1
