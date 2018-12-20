@@ -7,3 +7,4 @@ This is an example application showcasing how to run Go on TencentHub.
 # Test
 1
 2
+3
