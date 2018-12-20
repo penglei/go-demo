@@ -8,3 +8,4 @@ This is an example application showcasing how to run Go on TencentHub.
 1
 2
 3
+4
